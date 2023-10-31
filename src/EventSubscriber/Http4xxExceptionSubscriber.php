@@ -9,7 +9,7 @@ use Drupal\Core\Url;
 use Drupal\shield_agent\AccessDeniedHttpException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException as AccessDeniedHttpExceptionBase;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -59,14 +59,14 @@ class Http4xxExceptionSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public function on4xxException(GetResponseForExceptionEvent $event) {
+  public function on4xxException(ExceptionEvent $event) {
     if (!$event->isMasterRequest()) {
       return;
     }
 
     $mask_403_as_404 = (bool) $this->config->get('shield_agent.settings')
       ->get('mask_403');
-    $exception = $event->getException();
+    $exception = $event->getThrowable();
     if ($mask_403_as_404 && $exception instanceof AccessDeniedHttpExceptionBase) {
       if ($this->account->isAuthenticated() && !($exception instanceof AccessDeniedHttpException)) {
         if ($this->currentRouteMatch->getRouteName() == 'entity.user.canonical') {
@@ -81,7 +81,7 @@ class Http4xxExceptionSubscriber implements EventSubscriberInterface {
         return;
       }
 
-      $event->setException(new NotFoundHttpException());
+      $event->setThrowable(new NotFoundHttpException());
     }
   }
 

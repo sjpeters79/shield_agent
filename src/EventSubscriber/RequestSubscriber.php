@@ -8,7 +8,7 @@ use Drupal\Core\Routing\CurrentRouteMatch;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\shield_agent\AccessDeniedHttpException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -66,7 +66,7 @@ class RequestSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public function onRequest(GetResponseEvent $event) {
+  public function onRequest(RequestEvent $event) {
     if (!$event->isMasterRequest()) {
       return;
     }
@@ -103,7 +103,6 @@ class RequestSubscriber implements EventSubscriberInterface {
           return;
         }
 
-        $event->stopPropagation();
         throw new AccessDeniedHttpException();
       }
 
@@ -117,10 +116,8 @@ class RequestSubscriber implements EventSubscriberInterface {
           }
         }
 
-        $event->stopPropagation();
         throw new AccessDeniedHttpException();
       }
-
 
       if (empty($protected_environment['routes'])) {
         return;
@@ -129,7 +126,6 @@ class RequestSubscriber implements EventSubscriberInterface {
       foreach ($protected_environment['routes'] as $collection_name) {
         if (!empty($shielded_routes_collections[$collection_name])) {
           if (in_array($route_name, $shielded_routes_collections[$collection_name])) {
-            $event->stopPropagation();
             throw new AccessDeniedHttpException();
           }
         }

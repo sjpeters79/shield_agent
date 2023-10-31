@@ -47,7 +47,7 @@ class PublicDbUpdateNegotiator implements ThemeNegotiatorInterface {
 
     $protected_environments = $this->config->get('shield_agent.protector')
       ->get('environments');
-    list($_protecting_env, $_protecting_type) = explode('.', $protecting, 2);
+    [$_protecting_env, $_protecting_type] = explode('.', $protecting, 2);
     if (isset($protected_environments[$_protecting_env][$_protecting_type])) {
       $protected_environment = $protected_environments[$_protecting_env][$_protecting_type];
       $protected_environment += ['auth' => FALSE];

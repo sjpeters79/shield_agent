@@ -1,6 +1,6 @@
 name: 'Shield agent'
-description: 'Provides the ability for securing a Drupal 8 application and locking down various routes.'
+description: 'Provides the ability for securing a Drupal application and locking down various routes.'
 type: module
-core_version_requirement: ^8.9 || ^9
-version: 1.0
+core_version_requirement: ^9.5 || ^10
+version: "2.0"
 package: 'Shield agent'
