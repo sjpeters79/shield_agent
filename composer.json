@@ -1,5 +1,5 @@
 {
-  "name": "amcgowanca/shield_agent",
+  "name": "sjpeters79/shield_agent",
   "description": "Provides enhanced HTTP Basic Auth shielding capabilities.",
   "type": "drupal-module",
   "license": "GPL-2.0+",
