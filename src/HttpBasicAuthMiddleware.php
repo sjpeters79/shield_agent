@@ -12,6 +12,8 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 class HttpBasicAuthMiddleware implements HttpKernelInterface {
 
+  public const MAIN_REQUEST = 1;
+
   /**
    * The HTTP Kernel.
    *
@@ -42,8 +44,8 @@ class HttpBasicAuthMiddleware implements HttpKernelInterface {
   /**
    * {@inheritdoc}
    */
-  public function handle(Request $request, $type = self::MASTER_REQUEST, $catch = TRUE) {
-    if ($type != self::MASTER_REQUEST) {
+  public function handle(Request $request, int $type = self::MAIN_REQUEST, bool $catch = TRUE): Response {
+    if ($type != self::MAIN_REQUEST) {
       return $this->httpKernel->handle($request, $type, $catch);
     }
 
@@ -60,7 +62,7 @@ class HttpBasicAuthMiddleware implements HttpKernelInterface {
     }
 
     $protected_environments = $protector_settings->get('environments');
-    list($_protecting_env, $_protecting_type) = explode('.', $protecting, 2);
+    [$_protecting_env, $_protecting_type] = explode('.', $protecting, 2);
 
     if (isset($protected_environments[$_protecting_env][$_protecting_type])) {
       $protected_environment = $protected_environments[$_protecting_env][$_protecting_type];
@@ -97,7 +99,7 @@ class HttpBasicAuthMiddleware implements HttpKernelInterface {
     $username = $protector_settings->get('auth.username');
     $password = $protector_settings->get('auth.password');
 
-    if ($type != self::MASTER_REQUEST || empty($username) || (PHP_SAPI === 'cli' && $allow_cli)) {
+    if ($type != self::MAIN_REQUEST || empty($username) || (PHP_SAPI === 'cli' && $allow_cli)) {
       return $this->httpKernel->handle($request, $type, $catch);
     }
     else {
@@ -106,10 +108,10 @@ class HttpBasicAuthMiddleware implements HttpKernelInterface {
         $input_password = $request->server->get('PHP_AUTH_PW');
       }
       elseif (!empty($request->server->get('HTTP_AUTHORIZATION'))) {
-        list($input_username, $input_password) = explode(':', base64_decode(substr($request->server->get('HTTP_AUTHORIZATION'), 6)), 2);
+        [$input_username, $input_password] = explode(':', base64_decode(substr($request->server->get('HTTP_AUTHORIZATION'), 6)), 2);
       }
       elseif (!empty($request->server->get('REDIRECT_HTTP_AUTHORIZATION'))) {
-        list($input_username, $input_password) = explode(':', base64_decode(substr($request->server->get('REDIRECT_HTTP_AUTHORIZATION'), 6)), 2);
+        [$input_username, $input_password] = explode(':', base64_decode(substr($request->server->get('REDIRECT_HTTP_AUTHORIZATION'), 6)), 2);
       }
 
       if (isset($input_username) && isset($input_password) && $input_username === $username && hash_equals($password, $input_password)) {
