@@ -45,7 +45,9 @@ class HttpBasicAuthMiddleware implements HttpKernelInterface {
    * {@inheritdoc}
    */
   public function handle(Request $request, int $type = self::MAIN_REQUEST, bool $catch = TRUE): Response {
-    if ($type != self::MAIN_REQUEST) {
+    // Only activate if the request method is not an OPTIONS request.
+    // Otherwise this will break CORS preflight requests.
+    if ($type != self::MAIN_REQUEST || $request->getMethod() == 'OPTIONS') {
       return $this->httpKernel->handle($request, $type, $catch);
     }
 
